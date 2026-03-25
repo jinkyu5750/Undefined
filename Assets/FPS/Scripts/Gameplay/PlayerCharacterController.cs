@@ -108,10 +108,7 @@ namespace Unity.FPS.Gameplay
         {
             get
             {
-                if (m_WeaponsManager.IsAiming)
-                {
-                    return AimingRotationMultiplier;
-                }
+             
 
                 return 1f;
             }
@@ -163,7 +160,7 @@ namespace Unity.FPS.Gameplay
 
             m_Controller.enableOverlapRecovery = true;
 
-            m_Health.OnDie += OnDie;
+    
 
             // force the crouch state to false when starting
             SetCrouchingState(false, true);
