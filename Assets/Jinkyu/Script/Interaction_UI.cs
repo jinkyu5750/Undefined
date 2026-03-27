@@ -59,7 +59,7 @@ public class Interaction_UI : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
         isHolding = true;
 
-        objectScript = transform.root.GetComponent<CrossHair>().GetObjectScript();
+        objectScript = GameObject.Find("Player").GetComponent<PlayerSystem>().GetObjectScript();
         data = objectScript.GetData();
     }
 

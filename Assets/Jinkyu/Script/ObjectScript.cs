@@ -11,13 +11,32 @@ public class ObjectScript : MonoBehaviour
     float curInjectTimer_Dynamic;
 
 
-
     private StaticPropertyType storedStaticProperty;
     private DynamicPropertyType storedDynamicProperty;
 
+    private Transform player;
+
+    public bool isLifted { get; private set; }
+
+    float runningTime;
+
+    [SerializeField] float speed=0.5f;
+    [SerializeField] float length=0.5f;
+    float InitYPos = 0f;
+
+    private void Start()
+    {
+        player = GameObject.Find("Player").GetComponent<Transform>();
+        InitYPos = transform.position.y;
+    }
     //10초 뒤 돌아오는걸로
     private void Update()
     {
+
+        if (isLifted)
+        {
+            Lifting();
+        }
 
         if (data.properties.isInjected_Static)
         {
@@ -71,6 +90,21 @@ public class ObjectScript : MonoBehaviour
         return data;
     }
 
+    public void Lifting()
+    {
+
+        runningTime += Time.deltaTime * speed;
+        float yPos = (Mathf.Sin(runningTime) + 1f) * length;
 
 
+        Vector3 targetPos = player.transform.forward * (transform.position - player.transform.position).magnitude;
+        targetPos.y = InitYPos + yPos;
+        transform.position = targetPos;
+
+
+    }
+    public void SetIsLifted(bool on)
+    {
+        isLifted = on;
+    }
 }
