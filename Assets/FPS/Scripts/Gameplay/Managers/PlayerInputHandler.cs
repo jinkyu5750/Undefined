@@ -29,7 +29,7 @@ namespace Unity.FPS.Gameplay
         private InputAction m_LookAction;
         private InputAction m_JumpAction;
         private InputAction m_FireAction;
-        private InputAction m_AimAction;
+   //     private InputAction m_AimAction;
         private InputAction m_SprintAction;
         private InputAction m_CrouchAction;
         private InputAction m_ReloadAction;
@@ -49,28 +49,28 @@ namespace Unity.FPS.Gameplay
             m_MoveAction = InputSystem.actions.FindAction("Player/Move");
             m_LookAction = InputSystem.actions.FindAction("Player/Look");
             m_JumpAction = InputSystem.actions.FindAction("Player/Jump");
-            m_FireAction = InputSystem.actions.FindAction("Player/Fire");
-            m_AimAction = InputSystem.actions.FindAction("Player/Aim");
+         /*   m_FireAction = InputSystem.actions.FindAction("Player/Fire");
+            m_AimAction = InputSystem.actions.FindAction("Player/Aim");*/
             m_SprintAction = InputSystem.actions.FindAction("Player/Sprint");
             m_CrouchAction = InputSystem.actions.FindAction("Player/Crouch");
-            m_ReloadAction = InputSystem.actions.FindAction("Player/Reload");
-            m_NextWeaponAction = InputSystem.actions.FindAction("Player/NextWeapon");
+       /*     m_ReloadAction = InputSystem.actions.FindAction("Player/Reload");
+            m_NextWeaponAction = InputSystem.actions.FindAction("Player/NextWeapon");*/
             
             m_MoveAction.Enable();
             m_LookAction.Enable();
             m_JumpAction.Enable();
-            m_FireAction.Enable();
-            m_AimAction.Enable();
+      
+         //   m_AimAction.Enable();
             m_SprintAction.Enable();
             m_CrouchAction.Enable();
             m_ReloadAction.Enable();
             m_NextWeaponAction.Enable();
         }
 
-        void LateUpdate()
+   /*     void LateUpdate()
         {
             m_FireInputWasHeld = GetFireInputHeld();
-        }
+        }*/
 
         public bool CanProcessInput()
         {
@@ -153,7 +153,7 @@ namespace Unity.FPS.Gameplay
             return false;
         }
 
-        public bool GetFireInputDown()
+   /*     public bool GetFireInputDown()
         {
             return GetFireInputHeld() && !m_FireInputWasHeld;
         }
@@ -162,8 +162,8 @@ namespace Unity.FPS.Gameplay
         {
             return !GetFireInputHeld() && m_FireInputWasHeld;
         }
-
-        public bool GetFireInputHeld()
+*/
+     /*   public bool GetFireInputHeld()
         {
             if (CanProcessInput())
             {
@@ -171,9 +171,9 @@ namespace Unity.FPS.Gameplay
             }
 
             return false;
-        }
+        }*/
 
-        public bool GetAimInputHeld()
+ /*       public bool GetAimInputHeld()
         {
             if (CanProcessInput())
             {
@@ -181,7 +181,7 @@ namespace Unity.FPS.Gameplay
             }
 
             return false;
-        }
+        }*/
 
         public bool GetSprintInputHeld()
         {
@@ -223,7 +223,7 @@ namespace Unity.FPS.Gameplay
             return false;
         }
 
-        public int GetSwitchWeaponInput()
+      /*  public int GetSwitchWeaponInput()
         {
             if (CanProcessInput())
             {
@@ -237,7 +237,7 @@ namespace Unity.FPS.Gameplay
             }
 
             return 0;
-        }
+        }*/
 
         public int GetSelectWeaponInput()
         {

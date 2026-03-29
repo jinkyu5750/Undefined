@@ -131,25 +131,25 @@ namespace Unity.FPS.Gameplay
             {
                 if (!activeWeapon.AutomaticReload && m_InputHandler.GetReloadButtonDown() && activeWeapon.CurrentAmmoRatio < 1.0f)
                 {
-                    IsAiming = false;
+                //    IsAiming = false;
                     activeWeapon.StartReloadAnimation();
                     return;
                 }
-                // handle aiming down sights
-                IsAiming = m_InputHandler.GetAimInputHeld();
+             //   // handle aiming down sights
+          //      IsAiming = m_InputHandler.GetAimInputHeld();
 
                 // handle shooting
-                bool hasFired = activeWeapon.HandleShootInputs(
+         /*       bool hasFired = activeWeapon.HandleShootInputs(
                     m_InputHandler.GetFireInputDown(),
                     m_InputHandler.GetFireInputHeld(),
-                    m_InputHandler.GetFireInputReleased());
+                    m_InputHandler.GetFireInputReleased());*/
 
                 // Handle accumulating recoil
-                if (hasFired)
+          /*      if (hasFired)
                 {
                     m_AccumulatedRecoil += Vector3.back * activeWeapon.RecoilForce;
                     m_AccumulatedRecoil = Vector3.ClampMagnitude(m_AccumulatedRecoil, MaxRecoilDistance);
-                }
+                }*/
             }
 
             // weapon switch handling
@@ -157,8 +157,8 @@ namespace Unity.FPS.Gameplay
                 (activeWeapon == null || !activeWeapon.IsCharging) &&
                 (m_WeaponSwitchState == WeaponSwitchState.Up || m_WeaponSwitchState == WeaponSwitchState.Down))
             {
-                int switchWeaponInput = m_InputHandler.GetSwitchWeaponInput();
-                if (switchWeaponInput != 0)
+         //       int switchWeaponInput = m_InputHandler.GetSwitchWeaponInput();
+           /*     if (switchWeaponInput != 0)
                 {
                     bool switchUp = switchWeaponInput > 0;
                     SwitchWeapon(switchUp);
@@ -171,7 +171,7 @@ namespace Unity.FPS.Gameplay
                         if (GetWeaponAtSlotIndex(switchWeaponInput - 1) != null)
                             SwitchToWeaponIndex(switchWeaponInput - 1);
                     }
-                }
+                }*/
             }
 
             // Pointing at enemy handling

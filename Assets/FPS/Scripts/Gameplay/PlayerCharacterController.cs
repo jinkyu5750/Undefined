@@ -416,7 +416,7 @@ namespace Unity.FPS.Gameplay
                 m_Controller.height = m_TargetCharacterHeight;
                 m_Controller.center = Vector3.up * m_Controller.height * 0.5f;
                 PlayerCamera.transform.localPosition = Vector3.up * m_TargetCharacterHeight * CameraHeightRatio;
-                m_Actor.AimPoint.transform.localPosition = m_Controller.center;
+         //       m_Actor.AimPoint.transform.localPosition = m_Controller.center;
             }
             // Update smooth height
             else if (m_Controller.height != m_TargetCharacterHeight)
@@ -427,7 +427,7 @@ namespace Unity.FPS.Gameplay
                 m_Controller.center = Vector3.up * m_Controller.height * 0.5f;
                 PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
                     Vector3.up * m_TargetCharacterHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
-                m_Actor.AimPoint.transform.localPosition = m_Controller.center;
+           //     m_Actor.AimPoint.transform.localPosition = m_Controller.center;
             }
         }
 

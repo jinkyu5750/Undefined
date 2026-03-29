@@ -1,26 +1,41 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class PlayerSystem : MonoBehaviour
 {
-    [SerializeField] private ObjectProperties properties;//ÀúÀå - ¼ºÁúÀ» ÀúÀåÇÑ ¼ÕÀº ÇØ´ç ¼ºÁúÀ» °¡ÁöÁö ¾Ê´Â´Ù. º¸À¯¸¸ÇÏ´Â°ÅÀÓ
+    [Header("í˜„ì¬ ë³´ìœ ì¤‘ì¸ ì„±ì§ˆ")]
+    [SerializeField] private ObjectProperties properties;//ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´Â´ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´Â°ï¿½ï¿½ï¿½
 
+    [Header("ì˜¤ë¸Œì íŠ¸ ê°ì§€ ê±°ë¦¬")]
+    [SerializeField] private float detectDistance;
 
     public bool isLookObject { get; private set; }
-    [SerializeField] private float detectDistance;
     RaycastHit hit;
-
-  
-
     private ObjectScript objectScript;
+    private ObjectData data;
+    private ObjectScript liftedObject;
+
+    [Header("ë˜ì§€ê¸° ê´€ë ¨")]
+    [SerializeField] float throwPower;
+    [SerializeField] float throwTime = 2f;
+    float throwTimer = 0;
 
 
-    private  ObjectScript liftedObject;
+    ButtonControl input = null;
+    bool isClickObject;
+    [SerializeField] private float holdTime = 2f;
+    [SerializeField] private float holdTimer = 0;
+    [SerializeField] private bool isLeftClick;
+    [SerializeField] private bool isActionDone;
 
     private void Update()
     {
         DetectObject();
         Lifting();
+        Throw();
+        Extraction_Injection();
+
     }
     public void DetectObject()
     {
@@ -30,7 +45,7 @@ public class PlayerSystem : MonoBehaviour
             objectScript = hit.transform.GetComponent<ObjectScript>();
             if (objectScript != null)
             {
-                ObjectData data = objectScript.GetData();
+                data = objectScript.GetData();
                 if (data == null)
                 {
                     UIManager.instance.OnOffDiscription(false);
@@ -38,7 +53,7 @@ public class PlayerSystem : MonoBehaviour
                 }
                 isLookObject = true;
 
-                //µğ¹ö±ë¿ë µğ½ºÅ©¸³¼Ç ÆĞ³Î
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ï¿½ï¿½ ï¿½Ğ³ï¿½
                 UIManager.instance.OnOffDiscription(true);
                 UIManager.instance.SetObjectDiscription(
                     data.name,
@@ -52,24 +67,77 @@ public class PlayerSystem : MonoBehaviour
         isLookObject = false;
 
     }
+
+    public void Extraction_Injection()
+    {
+        if (liftedObject != null) return;
+
+        if (!isLookObject)
+        {
+            holdTimer = 0;
+            UIManager.instance.OnOff_Slider(false);
+            isClickObject = false;
+            return;
+        }
+
+        if (Mouse.current.press.wasPressedThisFrame)
+        {
+            isLeftClick = Mouse.current.leftButton.wasPressedThisFrame;
+            input = isLeftClick ? Mouse.current.leftButton : Mouse.current.rightButton;
+            isClickObject = true;
+        }
+
+        if (input != null && input.wasReleasedThisFrame)
+        {
+            isActionDone = false;
+            holdTimer = 0;
+            UIManager.instance.OnOff_Slider(false);
+        }
+
+
+
+        if (input != null && input.isPressed)
+        {
+            if (isActionDone || !isClickObject) return;
+
+            holdTimer += Time.deltaTime;
+            UIManager.instance.FillSlider(holdTimer, holdTime, false, isLeftClick);
+
+            if (holdTimer >= holdTime)
+            {
+                bool extractionOrInjection = isLeftClick ? properties.staticProperty == StaticPropertyType.None : properties.dynamicProperty == DynamicPropertyType.None;
+                //ì¢Œí´ë¦­ì´ë©´ ì •ì  noneì²´í¬, ìš°í´ë¦­ì´ë©´ ë™ì  noneì²´í¬
+                if (extractionOrInjection)
+                    Extraction(data, isLeftClick);
+                else
+                    Injection(properties, isLeftClick);
+
+                isActionDone = true;
+                holdTimer = 0;
+                UIManager.instance.OnOff_Slider(false);
+            }
+        }
+
+    }
+
     public void Extraction(ObjectData targetData, bool isLeftClick)
     {
         if (targetData == null) return;
 
+
+
         if (isLeftClick)
         {
-            if (properties.staticProperty != StaticPropertyType.None ||  // ÇöÀç°¡Áö°íÀÖ´Â°Ô¾ø¾î¾ßÇÔ
-                targetData.properties.staticProperty == StaticPropertyType.None || //   NoneÀÎ ¼ºÁúÀº ¸ø»ÌÀ½
-               targetData.properties.isInjected_Static) // ÇöÀç ¼ºÁúÀÌ ÁÖÀÔµÈ°Å´Â ¾ÈµÊ
+            if (targetData.properties.staticProperty == StaticPropertyType.None || // ì˜¤ë¸Œì íŠ¸ëŠ” ì„±ì§ˆì´ ìˆì–´ì•¼ í•¨
+               targetData.properties.isInjected_Static) // ì£¼ì…ëœ ì„±ì§ˆì´ë©´ ì•ˆë¨
                 return;
             else
                 properties.staticProperty = targetData.properties.staticProperty;
         }
         else
         {
-            if (properties.dynamicProperty != DynamicPropertyType.None ||
-                 targetData.properties.dynamicProperty == DynamicPropertyType.None ||
-               targetData.properties.isInjected_Dynamic)
+            if (targetData.properties.dynamicProperty == DynamicPropertyType.None ||
+          targetData.properties.isInjected_Dynamic)
                 return;
             else
                 properties.dynamicProperty = targetData.properties.dynamicProperty;
@@ -77,17 +145,16 @@ public class PlayerSystem : MonoBehaviour
         UIManager.instance.SetPropertyText(properties);
     }
 
-
-    public ObjectProperties Injection()
+    public void Injection(ObjectProperties playerProperties, bool isLeftClick)
     {
-        return properties;
+        objectScript.SetProperties(playerProperties, isLeftClick);
     }
     public void Lifting()
     {
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            if (isLookObject && liftedObject == null)
+            if (isLookObject && liftedObject == null && hit.collider != null)
             {
                 liftedObject = hit.transform.GetComponent<ObjectScript>();
                 liftedObject.SetIsLifted(true);
@@ -102,7 +169,32 @@ public class PlayerSystem : MonoBehaviour
 
     }
 
+    public void Throw()
+    {
+        if (liftedObject == null) return;
 
+        if (Keyboard.current.fKey.isPressed)
+        {
+            throwTimer += Time.deltaTime;
+            UIManager.instance.FillSlider(throwTimer, throwTime, true);
+        }
+
+
+        if (Keyboard.current.fKey.wasReleasedThisFrame)
+        {
+
+            if (throwTimer >= throwTime)
+            {
+                liftedObject.SetIsLifted(false);
+                liftedObject.GetComponent<Rigidbody>().AddForce(Camera.main.transform.forward * throwPower, ForceMode.Impulse);
+                liftedObject = null;
+            }
+            throwTimer = 0f;
+            UIManager.instance.OnOff_Slider(false);
+        }
+
+
+    }
 
     public ObjectScript GetObjectScript()
     {

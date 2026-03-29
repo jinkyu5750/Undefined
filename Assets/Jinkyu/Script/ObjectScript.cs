@@ -2,42 +2,57 @@ using UnityEngine;
 
 public class ObjectScript : MonoBehaviour
 {
+
+
     [SerializeField] private ObjectData data;
 
+    private Rigidbody rig;
+    [Header("ì£¼ì… í›„ ëŒì•„ì˜¤ëŠ” ì‹œê°„")]
     [SerializeField] float injectTimer_Static = 5f;
-    float curInjectTimer_Static;
-
     [SerializeField] float injectTimer_Dynamic = 5f;
+    float curInjectTimer_Static;
     float curInjectTimer_Dynamic;
 
 
-    private StaticPropertyType storedStaticProperty;
+   [SerializeField] private StaticPropertyType storedStaticProperty;
     private DynamicPropertyType storedDynamicProperty;
 
     private Transform player;
 
     public bool isLifted { get; private set; }
+    private bool readyToLift = false;
 
+    [Header("ì˜¤ë¸Œì íŠ¸ ë“¤ê¸° ê´€ë ¨ ")]
+    [SerializeField] float speed = 4;
+    [SerializeField] float length = 0.1f;
     float runningTime;
+    Vector3 targetPos;
+    Vector3 offset;
 
-    [SerializeField] float speed=0.5f;
-    [SerializeField] float length=0.5f;
-    float InitYPos = 0f;
+
+
 
     private void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
-        InitYPos = transform.position.y;
+        rig = GetComponent<Rigidbody>();
+        targetPos = transform.position + new Vector3(0, 0.5f, 0);
     }
-    //10ÃÊ µÚ µ¹¾Æ¿À´Â°É·Î
+
+
     private void Update()
     {
 
         if (isLifted)
-        {
             Lifting();
-        }
 
+        InjectionTimer();
+
+    }
+
+    #region Injection
+    public void InjectionTimer()
+    {
         if (data.properties.isInjected_Static)
         {
             curInjectTimer_Static += Time.deltaTime;
@@ -61,18 +76,18 @@ public class ObjectScript : MonoBehaviour
             }
         }
     }
-    public void SetProperties(ObjectProperties properties, bool isLeftClick) // Injection
+    public void SetProperties(ObjectProperties playerProperties, bool isLeftClick) // Injection
     {
-        if (properties == null) return;
+
+        if (playerProperties == null) return;
 
         if (isLeftClick)
         {
             if (data.properties.isInjected_Static) return;
-
             data.properties.isInjected_Static = true;
 
-            storedStaticProperty = data.properties.staticProperty; // ¼ºÁú ÀÓ½ÃÀúÀå
-            data.properties.staticProperty = properties.staticProperty;
+            storedStaticProperty = data.properties.staticProperty; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½
+            data.properties.staticProperty = playerProperties.staticProperty;
         }
         else
         {
@@ -80,31 +95,52 @@ public class ObjectScript : MonoBehaviour
 
             data.properties.isInjected_Dynamic = true;
 
-            storedDynamicProperty = data.properties.dynamicProperty; // ¼ºÁú ÀÓ½ÃÀúÀå
-            data.properties.dynamicProperty = properties.dynamicProperty;
+            storedDynamicProperty = data.properties.dynamicProperty; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½
+            data.properties.dynamicProperty = playerProperties.dynamicProperty;
+        }
+
+
+    }
+    #endregion
+
+    #region Lifting
+    public void Lifting()
+    {
+
+        runningTime += Time.deltaTime * speed;
+        float yPos = (Mathf.Sin(runningTime)) * length;
+        targetPos = player.position + (Camera.main.transform.forward) * offset.magnitude;
+        targetPos.y = targetPos.y + yPos + 1.5f;
+
+        if (readyToLift)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 10f);
+
+            if (Vector3.Distance(transform.position, targetPos) < 0.01f)
+                readyToLift = false;
+
+            return;
+        }
+
+        transform.position = targetPos;
+    }
+    public void SetIsLifted(bool on)
+    {
+        isLifted = on;
+        rig.useGravity = !on;
+        if (on)
+        {
+            offset = transform.position - player.position; // í”Œë ˆì´ì–´ì™€ì˜ ê±°ë¦¬
+            runningTime = 0f;
+            readyToLift = true;
         }
 
     }
+    #endregion
     public ObjectData GetData()
     {
         return data;
     }
 
-    public void Lifting()
-    {
 
-        runningTime += Time.deltaTime * speed;
-        float yPos = (Mathf.Sin(runningTime) + 1f) * length;
-
-
-        Vector3 targetPos = player.transform.forward * (transform.position - player.transform.position).magnitude;
-        targetPos.y = InitYPos + yPos;
-        transform.position = targetPos;
-
-
-    }
-    public void SetIsLifted(bool on)
-    {
-        isLifted = on;
-    }
 }

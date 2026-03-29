@@ -20,31 +20,13 @@ public class CrossHair : MonoBehaviour
         if (!player.isLookObject)
             UIManager.instance.OnOffDiscription(false);
 
-        //  OnOff_Interaction();
         ChangeCrossHair();
 
 
-     //   Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * rayDistance, Color.red);
 
     }
 
 
-
-    public void OnOff_Interaction()
-    {
-        if (player.isLookObject)
-        {
-            if (Keyboard.current != null && Keyboard.current.eKey.isPressed)
-                UIManager.instance.OnOff_Interaction(true);
-            else
-                UIManager.instance.OnOff_Interaction(false);
-
-        }
-        else
-            UIManager.instance.OnOff_Interaction(false);
-
-
-    }
 
     public void ChangeCrossHair()
     {

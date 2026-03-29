@@ -7,15 +7,15 @@ public class UIManager : MonoBehaviour
 
     public static UIManager instance;
 
-    //µð¹ö±ë¿ë µð½ºÅ©¸³¼Ç ÆÐ³Î
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½
     [SerializeField] private Image ObjectDiscription;
     private TextMeshProUGUI discription_Name;
     private TextMeshProUGUI discription_StaticProperty;
     private TextMeshProUGUI discription_DynamicProperty;
     //
 
-    [SerializeField] private Image interation;
-    private Image interactionGage;
+    [SerializeField] private Image throwSlider;
+    private Image slider;
 
     [SerializeField] private TextMeshProUGUI staticPropertyText;
     [SerializeField] private TextMeshProUGUI dynamicPropertyText;
@@ -27,16 +27,16 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
       
-        interactionGage = interation.transform.GetChild(1).GetComponent<Image>();
+        slider = throwSlider.transform.GetChild(0).GetComponent<Image>();
 
-        //µð¹ö±ë¿ë µð½ºÅ©¸³¼Ç ÆÐ³Î
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½
         discription_Name = ObjectDiscription.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         discription_StaticProperty = ObjectDiscription.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         discription_DynamicProperty = ObjectDiscription.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
 
-    //µð¹ö±ë¿ë µð½ºÅ©¸³¼Ç ÆÐ³Î
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½
     public void SetObjectDiscription(string name, string staticProperty, string DynamicProperty)
     {
         discription_Name.text = "Name : " + name;
@@ -50,17 +50,21 @@ public class UIManager : MonoBehaviour
     }
     //
 
-    public void FillGageSlider(float timer,float time,bool isLeftClick)
+    public void FillSlider(float timer,float time,bool isLift ,bool isLeftClick = true)
     {
      
 
-        if (interation == null || interactionGage == null) Debug.Log("ÀÎÅÍ·¢¼ÇÀÌ³ª °ÔÀÌÁö ³Î");
+        if (throwSlider == null || slider == null) Debug.Log("NULL");
 
+        if (!throwSlider.gameObject.activeSelf) OnOff_Slider(true);
 
-        if (!interactionGage.gameObject.activeSelf) OnOff_InteractionGage(true);
-
-        interactionGage.color = isLeftClick? new Color32(96, 169, 245,255): new Color32(245,102,96,255);
-        interactionGage.fillAmount = Mathf.Clamp01(timer / time);
+        if (isLift)
+            slider.color = new Color32(91, 91, 91, 255);
+        else
+        {
+            slider.color = isLeftClick ? new Color32(96, 169, 245, 255) : new Color32(245, 102, 96, 255);
+        }
+        slider.fillAmount = Mathf.Clamp01(timer / time);
     }
 
 
@@ -71,16 +75,16 @@ public class UIManager : MonoBehaviour
 
     }
   
-    public void OnOff_InteractionGage(bool active)
+    public void OnOff_Slider(bool active)
     {
-        interactionGage.gameObject.SetActive(active);
+        throwSlider.gameObject.SetActive(active);
     }
-    public void OnOff_Interaction(bool active)
+/*    public void OnOff_Interaction(bool active)
     {
         Cursor.lockState = active ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = active;
 
         interation.gameObject.SetActive(active);
-    }
+    }*/
 
 }
