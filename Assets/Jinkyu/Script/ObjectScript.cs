@@ -1,6 +1,7 @@
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
-public class ObjectScript : MonoBehaviour
+public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
 {
 
 
@@ -30,6 +31,8 @@ public class ObjectScript : MonoBehaviour
     Vector3 offset;
 
 
+    public virtual bool CanReact(PropertyType property) => true;
+    public abstract void OnPropertyInjected(PropertyType property);
 
 
     private void Start()
@@ -88,6 +91,8 @@ public class ObjectScript : MonoBehaviour
 
             storedStaticProperty = data.properties.staticProperty; // ���� �ӽ�����
             data.properties.staticProperty = playerProperties.staticProperty;
+            OnPropertyInjected(data.properties.staticProperty);
+
         }
         else
         {
