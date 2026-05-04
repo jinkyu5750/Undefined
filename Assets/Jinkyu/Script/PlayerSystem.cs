@@ -80,7 +80,8 @@ public class PlayerSystem : MonoBehaviour
             return;
         }
 
-        if (Mouse.current.press.wasPressedThisFrame)
+        // Mouse.press는 기본(왼쪽) 버튼만 해당 — 우클릭은 감지되지 않음
+        if (Mouse.current.leftButton.wasPressedThisFrame || Mouse.current.rightButton.wasPressedThisFrame)
         {
             isLeftClick = Mouse.current.leftButton.wasPressedThisFrame;
             input = isLeftClick ? Mouse.current.leftButton : Mouse.current.rightButton;
@@ -156,7 +157,10 @@ public class PlayerSystem : MonoBehaviour
         {
             if (isLookObject && liftedObject == null && hit.collider != null)
             {
-                liftedObject = hit.transform.GetComponent<ObjectScript>();
+                var objectScript = hit.transform.GetComponent<ObjectScript>();
+                if (!objectScript.GetData().canHold) return;
+
+                liftedObject = objectScript;
                 liftedObject.SetIsLifted(true);
             }
             else if (liftedObject.isLifted)

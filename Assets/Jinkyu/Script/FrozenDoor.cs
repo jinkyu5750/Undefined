@@ -5,13 +5,27 @@ public class FrozenDoor : ObjectScript
 {
     [SerializeField]
     private bool isFrozen = true;
-    public override void OnPropertyInjected(PropertyType property)
+    public override void OnPropertyInjected_Static(StaticPropertyType property)
     {
-
-        // 주입시 리액션 
+      
     }
 
-    
+    public override void OnPropertyInjected_Dynamic(DynamicPropertyType property)
+    {
+
+        switch(property)
+        {
+            case DynamicPropertyType.Fever:
+                Melt();
+                break;
+            default:
+                Debug.Log("뜨겁지않아");
+                break;
+        }
+
+    }
+
+
     public void Melt()
     {
         isFrozen = false;

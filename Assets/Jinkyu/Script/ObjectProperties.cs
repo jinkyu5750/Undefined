@@ -1,6 +1,6 @@
 using System;
 
-public enum StaticPropertyType { None, Heavy, Light, Hard, Clear, Slippery }//¹ß±¤ ¾ÏÈæÀº ¸Ó¶óÇÏ³ë
+public enum StaticPropertyType { None, Heavy, Light, Hard, Clear, Slippery }//ï¿½ß±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ó¶ï¿½ï¿½Ï³ï¿½
 public enum DynamicPropertyType { None, Elasticity, Reflection, Engine, Adhesion, Electricity, Fever }
 
 [Serializable]

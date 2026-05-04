@@ -56,15 +56,15 @@ namespace Unity.FPS.Gameplay
        /*     m_ReloadAction = InputSystem.actions.FindAction("Player/Reload");
             m_NextWeaponAction = InputSystem.actions.FindAction("Player/NextWeapon");*/
             
-            m_MoveAction.Enable();
-            m_LookAction.Enable();
-            m_JumpAction.Enable();
+      //      m_MoveAction.Enable();
+     //       m_LookAction.Enable();
+     //       m_JumpAction.Enable();
       
          //   m_AimAction.Enable();
-            m_SprintAction.Enable();
-            m_CrouchAction.Enable();
-            m_ReloadAction.Enable();
-            m_NextWeaponAction.Enable();
+     //       m_SprintAction.Enable();
+      //      m_CrouchAction.Enable();
+        //    m_ReloadAction.Enable();
+        //    m_NextWeaponAction.Enable();
         }
 
    /*     void LateUpdate()

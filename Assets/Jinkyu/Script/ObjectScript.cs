@@ -1,4 +1,3 @@
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
@@ -31,8 +30,10 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
     Vector3 offset;
 
 
-    public virtual bool CanReact(PropertyType property) => true;
-    public abstract void OnPropertyInjected(PropertyType property);
+
+    public abstract void OnPropertyInjected_Static(StaticPropertyType property);
+    public abstract void OnPropertyInjected_Dynamic(DynamicPropertyType property);
+
 
 
     private void Start()
@@ -91,7 +92,8 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
 
             storedStaticProperty = data.properties.staticProperty; // ���� �ӽ�����
             data.properties.staticProperty = playerProperties.staticProperty;
-            OnPropertyInjected(data.properties.staticProperty);
+
+            OnPropertyInjected_Static(data.properties.staticProperty);
 
         }
         else
@@ -102,6 +104,8 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
 
             storedDynamicProperty = data.properties.dynamicProperty; // ���� �ӽ�����
             data.properties.dynamicProperty = playerProperties.dynamicProperty;
+            OnPropertyInjected_Dynamic(data.properties.dynamicProperty);
+
         }
 
 
