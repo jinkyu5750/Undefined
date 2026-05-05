@@ -13,15 +13,10 @@ public class FrozenDoor : ObjectScript
     public override void OnPropertyInjected_Dynamic(DynamicPropertyType property)
     {
 
-        switch(property)
-        {
-            case DynamicPropertyType.Fever:
-                Melt();
-                break;
-            default:
-                Debug.Log("¶ß°ÌÁö¾Ê¾Æ");
-                break;
-        }
+        base.OnPropertyInjected_Dynamic(property);
+
+        if (property == DynamicPropertyType.Fever)
+            Melt();
 
     }
 

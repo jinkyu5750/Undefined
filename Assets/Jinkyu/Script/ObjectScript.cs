@@ -31,9 +31,29 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
 
 
 
-    public abstract void OnPropertyInjected_Static(StaticPropertyType property);
-    public abstract void OnPropertyInjected_Dynamic(DynamicPropertyType property);
+    public virtual void OnPropertyInjected_Static(StaticPropertyType property)
+    {
+        switch(property)
+        {
+            case StaticPropertyType.Heavy:
+                // 무거워지기
+                break;
+            case StaticPropertyType.Light:
+                //가벼워지기
+                break;
 
+        }
+    }
+    public virtual void OnPropertyInjected_Dynamic(DynamicPropertyType property)
+    {
+        switch (property)
+        {
+            case DynamicPropertyType.Elasticity:
+                //탄성높이기
+                break;
+           
+        }
+    }
 
 
     private void Start()
@@ -80,14 +100,14 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
             }
         }
     }
-    public void SetProperties(ObjectProperties playerProperties, bool isLeftClick) // Injection
+    public bool SetProperties(ObjectProperties playerProperties, bool isLeftClick) // Injection
     {
 
-        if (playerProperties == null) return;
+        if (playerProperties == null) return false;
 
         if (isLeftClick)
         {
-            if (data.properties.isInjected_Static) return;
+            if (data.properties.isInjected_Static) return false;
             data.properties.isInjected_Static = true;
 
             storedStaticProperty = data.properties.staticProperty; // ���� �ӽ�����
@@ -98,7 +118,7 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
         }
         else
         {
-            if (data.properties.isInjected_Dynamic) return;
+            if (data.properties.isInjected_Dynamic) return false;
 
             data.properties.isInjected_Dynamic = true;
 
@@ -107,6 +127,8 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
             OnPropertyInjected_Dynamic(data.properties.dynamicProperty);
 
         }
+
+        return true;
 
 
     }

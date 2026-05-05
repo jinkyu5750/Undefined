@@ -148,7 +148,12 @@ public class PlayerSystem : MonoBehaviour
 
     public void Injection(ObjectProperties playerProperties, bool isLeftClick)
     {
-        objectScript.SetProperties(playerProperties, isLeftClick);
+        if (objectScript.SetProperties(playerProperties, isLeftClick))
+        {
+            if (isLeftClick) playerProperties.staticProperty = StaticPropertyType.None;
+            else playerProperties.dynamicProperty = DynamicPropertyType.None;
+
+        }
     }
     public void Lifting()
     {
