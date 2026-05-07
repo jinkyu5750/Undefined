@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
@@ -7,6 +8,8 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
     [SerializeField] private ObjectData data;
 
     private Rigidbody rig;
+    private Renderer rend;
+
     [Header("주입 후 돌아오는 시간")]
     [SerializeField] float injectTimer_Static = 5f;
     [SerializeField] float injectTimer_Dynamic = 5f;
@@ -36,10 +39,14 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
         switch(property)
         {
             case StaticPropertyType.Heavy:
-                // 무거워지기
+                rig.mass = 100f;
                 break;
-            case StaticPropertyType.Light:
-                //가벼워지기
+            case StaticPropertyType.Light: // 들기가능으로?
+                data.canHold = true;
+                break;
+            case StaticPropertyType.Transparent:
+                rend.material.SetColor("_BaseColor", new Color(1f, 1f, 1f, 1f));
+                    StartCoroutine(SetAlpha(1f));
                 break;
 
         }
@@ -60,6 +67,7 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
         rig = GetComponent<Rigidbody>();
+        rend = GetComponent<Renderer>();
         targetPos = transform.position + new Vector3(0, 0.5f, 0);
     }
 
@@ -173,5 +181,24 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
         return data;
     }
 
+    public IEnumerator SetAlpha(float duration)
+    {
+        var mat = GetComponent<Renderer>().material;
+        Texture baseMap = mat.GetTexture("_BaseMap");
+        Color color = mat.color;
+
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            color.a = Mathf.Lerp(1f, 0.3f, time / duration);
+            mat.color = color;
+            yield return null;
+        }
+    }
+
+
 
 }
+

@@ -116,7 +116,7 @@ namespace Unity.FPS.Gameplay
 
         Health m_Health;
         PlayerInputHandler m_InputHandler;
-        CharacterController m_Controller;
+       public  CharacterController m_Controller;
         PlayerWeaponsManager m_WeaponsManager;
         Actor m_Actor;
         Vector3 m_GroundNormal;

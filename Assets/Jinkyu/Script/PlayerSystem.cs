@@ -1,9 +1,23 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using Unity.FPS.Gameplay;
+using System.Collections.Generic;
+using UnityEngine.InputSystem.XR;
 
 public class PlayerSystem : MonoBehaviour
 {
+
+    [Header("튕김(Elasticity)")]
+    [SerializeField] private float elasticityUpImpulse = 15f;
+
+    private Rigidbody rig;
+    private PlayerCharacterController fpsSampleController;
+    private CharacterScript.FPSController simpleFpsController;
+
+    // CharacterController는 OnCollisionEnter가 없어서 "Enter 순간"을 프레임 스탬프로 판별
+    private readonly Dictionary<int, int> _elasticLastHitFrameByColliderId = new();
+
     [Header("현재 보유중인 성질")]
     [SerializeField] private ObjectProperties properties;//���� - ������ ������ ���� �ش� ������ ������ �ʴ´�. �������ϴ°���
 
@@ -29,13 +43,18 @@ public class PlayerSystem : MonoBehaviour
     [SerializeField] private bool isLeftClick;
     [SerializeField] private bool isActionDone;
 
+    private void Start()
+    {
+        rig = GetComponent<Rigidbody>();
+        fpsSampleController = GetComponent<PlayerCharacterController>();
+        simpleFpsController = GetComponent<CharacterScript.FPSController>();
+    }
     private void Update()
     {
         DetectObject();
         Lifting();
         Throw();
         Extraction_Injection();
-
     }
     public void DetectObject()
     {
@@ -205,7 +224,32 @@ public class PlayerSystem : MonoBehaviour
 
     }
 
-    public ObjectScript GetObjectScript()
+  
+    private void ApplyUpImpulse(float upImpulse)
+    {
+        // 1) Unity FPS Sample 컨트롤러(캐릭터컨트롤러 기반): Y속도 직접 올리기
+        if (fpsSampleController != null)
+        {
+            Vector3 v = fpsSampleController.CharacterVelocity;
+            v.y = Mathf.Max(v.y, upImpulse);
+            fpsSampleController.CharacterVelocity = v;
+            return;
+        }
+
+        // 2) 간단 FPSController(캐릭터컨트롤러 기반): 공개 API로 Y속도 올리기
+        if (simpleFpsController != null)
+        {
+            simpleFpsController.AddVerticalImpulse(upImpulse);
+            return;
+        }
+
+        // 3) 리지드바디 기반 이동이면 AddForce로 처리
+        if (rig != null)
+        {
+            rig.AddForce(Vector3.up * upImpulse, ForceMode.Impulse);
+        }
+    }
+        public ObjectScript GetObjectScript()
     {
         return objectScript;
     }
