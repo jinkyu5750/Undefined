@@ -1,9 +1,8 @@
+using System.Collections.Generic;
+using Unity.FPS.Gameplay;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using Unity.FPS.Gameplay;
-using System.Collections.Generic;
-using UnityEngine.InputSystem.XR;
 
 public class PlayerSystem : MonoBehaviour
 {
@@ -224,32 +223,9 @@ public class PlayerSystem : MonoBehaviour
 
     }
 
-  
-    private void ApplyUpImpulse(float upImpulse)
-    {
-        // 1) Unity FPS Sample 컨트롤러(캐릭터컨트롤러 기반): Y속도 직접 올리기
-        if (fpsSampleController != null)
-        {
-            Vector3 v = fpsSampleController.CharacterVelocity;
-            v.y = Mathf.Max(v.y, upImpulse);
-            fpsSampleController.CharacterVelocity = v;
-            return;
-        }
 
-        // 2) 간단 FPSController(캐릭터컨트롤러 기반): 공개 API로 Y속도 올리기
-        if (simpleFpsController != null)
-        {
-            simpleFpsController.AddVerticalImpulse(upImpulse);
-            return;
-        }
 
-        // 3) 리지드바디 기반 이동이면 AddForce로 처리
-        if (rig != null)
-        {
-            rig.AddForce(Vector3.up * upImpulse, ForceMode.Impulse);
-        }
-    }
-        public ObjectScript GetObjectScript()
+    public ObjectScript GetObjectScript()
     {
         return objectScript;
     }

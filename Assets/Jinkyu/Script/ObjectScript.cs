@@ -199,6 +199,12 @@ public abstract class ObjectScript : MonoBehaviour, IPropertyReactor
     }
 
 
-
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.collider.CompareTag("Player") && data.properties.dynamicProperty == DynamicPropertyType.Elasticity)
+        {
+            collision.gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 5f, ForceMode.Impulse);
+        }
+    }
 }
 

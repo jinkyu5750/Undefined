@@ -274,6 +274,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 114721187}
   m_CullTransparentMesh: 1
+--- !u!1001 &132295567
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.3994787
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.254
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.759705
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465874614195511422, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2628451322561478224, guid: 5d40a3ea0d233464288ad91319a70d9d,
+        type: 3}
+      propertyPath: m_Name
+      value: Paper
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5d40a3ea0d233464288ad91319a70d9d, type: 3}
 --- !u!1 &240859973 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8742610872569765373, guid: 158c7b2b67b14c6479542df1b92f14ce,
@@ -297,7 +365,7 @@ MonoBehaviour:
     canHold: 0
     properties:
       staticProperty: 0
-      dynamicProperty: 0
+      dynamicProperty: 1
       isInjected_Static: 0
       isInjected_Dynamic: 0
   injectTimer_Static: 5
@@ -2038,31 +2106,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 298744117520805562, guid: 8b6a2c710302fed43814465c7817fbab,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 783424908873546082, guid: 8b6a2c710302fed43814465c7817fbab,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1360575517897679518, guid: 8b6a2c710302fed43814465c7817fbab,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4205022973215787166, guid: 8b6a2c710302fed43814465c7817fbab,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6268538116984687401, guid: 8b6a2c710302fed43814465c7817fbab,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7253983127304857660, guid: 8b6a2c710302fed43814465c7817fbab,
         type: 3}
       propertyPath: m_Name
@@ -2887,3 +2930,4 @@ SceneRoots:
   - {fileID: 1961974111}
   - {fileID: 1512573550}
   - {fileID: 1307420185}
+  - {fileID: 132295567}
