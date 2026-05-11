@@ -17,6 +17,7 @@ public class ElectricDoor : ObjectBase
         if (property == DynamicPropertyType.Engine)
         {
             isOpen = true;
+            TryOpenDoor();
         }
 
     }
