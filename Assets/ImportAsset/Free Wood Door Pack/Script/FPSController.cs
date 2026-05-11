@@ -74,10 +74,5 @@ namespace CharacterScript
                 transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
             }
         }
-
-        public void AddVerticalImpulse(float upImpulse)
-        {
-            moveDirection.y = Mathf.Max(moveDirection.y, upImpulse);
-        }
     }
 }

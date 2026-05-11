@@ -25,9 +25,9 @@ public class PlayerSystem : MonoBehaviour
 
     public bool isLookObject { get; private set; }
     RaycastHit hit;
-    private ObjectScript objectScript;
+    [SerializeField]private ObjectBase lookingObject;
     private ObjectData data;
-    private ObjectScript liftedObject;
+   [SerializeField] private ObjectBase liftedObject;
 
     [Header("던지기 관련")]
     [SerializeField] float throwPower;
@@ -58,12 +58,15 @@ public class PlayerSystem : MonoBehaviour
     public void DetectObject()
     {
         Ray ray = Camera.main.ViewportPointToRay(new Vector2(0.5f, 0.5f));
+
         if (Physics.Raycast(ray, out hit, detectDistance))
         {
-            objectScript = hit.transform.GetComponent<ObjectScript>();
-            if (objectScript != null)
+            lookingObject = hit.transform.GetComponent<ObjectBase>();
+            if (lookingObject != null)
             {
-                data = objectScript.GetData();
+                if (lookingObject == liftedObject) return; // 들고있는건 패스
+
+                data = lookingObject.GetData();
                 if (data == null)
                 {
                     UIManager.instance.OnOffDiscription(false);
@@ -166,10 +169,16 @@ public class PlayerSystem : MonoBehaviour
 
     public void Injection(ObjectProperties playerProperties, bool isLeftClick)
     {
-        if (objectScript.SetProperties(playerProperties, isLeftClick))
+        if (lookingObject.SetProperties(playerProperties, isLeftClick))
         {
             if (isLeftClick) playerProperties.staticProperty = StaticPropertyType.None;
             else playerProperties.dynamicProperty = DynamicPropertyType.None;
+
+            UIManager.instance.SetObjectDiscription(
+                   data.name,
+                   data.properties.staticProperty.ToString(),
+                   data.properties.dynamicProperty.ToString()
+               );
 
         }
     }
@@ -178,16 +187,29 @@ public class PlayerSystem : MonoBehaviour
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
+
+
+
             if (isLookObject && liftedObject == null && hit.collider != null)
             {
-                var objectScript = hit.transform.GetComponent<ObjectScript>();
-                if (!objectScript.GetData().canHold) return;
+                var ObjectBase = hit.transform.GetComponent<ObjectBase>();
+                if (!ObjectBase.GetData().canHold) return;
 
-                liftedObject = objectScript;
+                liftedObject = ObjectBase;
                 liftedObject.SetIsLifted(true);
             }
             else if (liftedObject.isLifted)
             {
+
+                if (liftedObject.CompareTag("Puzzle"))
+                {
+                    var door = lookingObject.GetComponent<Door_Tutorial_01>();
+
+                    if (door != null)
+                        door.SetPuzzle(liftedObject.gameObject);
+
+                }
+
                 liftedObject.SetIsLifted(false);
                 liftedObject = null;
             }
@@ -225,8 +247,8 @@ public class PlayerSystem : MonoBehaviour
 
 
 
-    public ObjectScript GetObjectScript()
+    public ObjectBase GetObjectBase()
     {
-        return objectScript;
+        return lookingObject;
     }
 }

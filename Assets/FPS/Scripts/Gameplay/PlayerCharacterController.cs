@@ -48,6 +48,15 @@ namespace Unity.FPS.Gameplay
         [Tooltip("Height at which the player dies instantly when falling off the map")]
         public float KillHeight = -50f;
 
+        [Header("Physics")]
+        [Tooltip("Rigidbody 이동은 매 FixedUpdate에서 속도를 쓰지만, 지상에선 PhysX 접선 마찰이 그걸 즉시 잡아먹습니다. 마찰 0 근처 재질을 캡슐에 넣습니다.")]
+        [SerializeField] bool ApplyLowFrictionToCapsule = true;
+
+        [Tooltip("넣으면 이 재질을 사용합니다 (얼음/미끄럼 특수 구간 등). 비우면 위 설정으로 자동 생성.")]
+        [SerializeField] PhysicsMaterial CapsuleFrictionOverride;
+
+        static PhysicsMaterial s_DefaultCapsuleFriction;
+
         [Header("Rotation")]
         [Tooltip("Rotation speed for moving the camera")]
         public float RotationSpeed = 200f;
@@ -125,7 +134,7 @@ namespace Unity.FPS.Gameplay
 
         Vector3 m_GroundNormal;
         Vector3 m_LatestImpactSpeed;
-        float m_LastTimeJumped;
+        float m_LastTimeJumped = -1f;
         float m_CameraVerticalAngle;
         float m_FootstepDistanceCounter;
         float m_TargetCapsuleHeight;
@@ -135,8 +144,55 @@ namespace Unity.FPS.Gameplay
         float m_JumpQueuedTime = -1f;
         const float k_JumpBufferWindow = 0.15f; // 입력을 0.15초간 유지
         const float k_JumpGroundingPreventionTime = 0.2f;
-        const float k_GroundCheckDistanceInAir = 0.07f;
+        const float k_GroundCheckDistanceInAir = 0.12f;
         const float k_GroundStickVelocity = -2f;
+        const float k_CoyoteJumpTime = 0.12f;
+        const float k_MinTimeBetweenJumps = 0.08f;
+
+        float m_LastGroundedForCoyoteFixedTime = -1000f;
+
+        bool CollisionSourceSuppressesGroundStick(Collision collision)
+        {
+            foreach (MonoBehaviour mb in collision.collider.GetComponentsInParent<MonoBehaviour>(true))
+            {
+                if (mb is IGroundStickSuppression s && s.SuppressRigidbodyGroundStick)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>PhysX가 접촉 해결로 양의 세로 속도를 누적하는 것을 줄임. Elasticity 표면은 제외.</summary>
+        void OnCollisionStay(Collision collision)
+        {
+            if (CollisionSourceSuppressesGroundStick(collision))
+                return;
+
+            if (Time.time < m_LastTimeJumped + k_JumpGroundingPreventionTime)
+                return;
+
+            bool groundLike = false;
+            int cnt = collision.contactCount;
+            for (int i = 0; i < cnt; i++)
+            {
+                ContactPoint pt = collision.GetContact(i);
+                if (pt.normal.y >= 0.55f && IsNormalUnderSlopeLimit(pt.normal))
+                {
+                    groundLike = true;
+                    break;
+                }
+            }
+
+            if (!groundLike)
+                return;
+
+            Vector3 v = m_Rigidbody.linearVelocity;
+            if (v.y > k_GroundStickVelocity)
+            {
+                v.y = k_GroundStickVelocity;
+                m_Rigidbody.linearVelocity = v;
+            }
+        }
 
         void Awake()
         {
@@ -158,7 +214,7 @@ namespace Unity.FPS.Gameplay
             m_InputHandler = GetComponent<PlayerInputHandler>();
             DebugUtility.HandleErrorIfNullGetComponent<PlayerInputHandler, PlayerCharacterController>(m_InputHandler,
                 this, gameObject);
-
+/*
             m_WeaponsManager = GetComponent<PlayerWeaponsManager>();
             DebugUtility.HandleErrorIfNullGetComponent<PlayerWeaponsManager, PlayerCharacterController>(
                 m_WeaponsManager, this, gameObject);
@@ -168,18 +224,46 @@ namespace Unity.FPS.Gameplay
 
             m_Actor = GetComponent<Actor>();
             DebugUtility.HandleErrorIfNullGetComponent<Actor, PlayerCharacterController>(m_Actor, this, gameObject);
-
+*/
             m_Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             m_Rigidbody.useGravity = false;
 
             SetCrouchingState(false, true);
             UpdateCharacterHeight(true);
+
+            ConfigureCapsuleFriction();
+        }
+
+        void ConfigureCapsuleFriction()
+        {
+            if (CapsuleFrictionOverride != null)
+            {
+                m_Capsule.sharedMaterial = CapsuleFrictionOverride;
+                return;
+            }
+
+            if (!ApplyLowFrictionToCapsule)
+                return;
+
+            if (s_DefaultCapsuleFriction == null)
+            {
+                s_DefaultCapsuleFriction = new PhysicsMaterial("PlayerCharacter_DefaultNoFriction")
+                {
+                    dynamicFriction = 0f,
+                    staticFriction = 0f,
+                    frictionCombine = PhysicsMaterialCombine.Multiply,
+                    bounceCombine = PhysicsMaterialCombine.Minimum,
+                    bounciness = 0f
+                };
+            }
+
+            m_Capsule.sharedMaterial = s_DefaultCapsuleFriction;
         }
 
         void Update()
         {
-            if (!IsDead && transform.position.y < KillHeight)
+            if (!IsDead && m_Health != null && transform.position.y < KillHeight)
                 m_Health.Kill();
 
             HasJumpedThisFrame = false;
@@ -210,6 +294,9 @@ namespace Unity.FPS.Gameplay
         {
             bool wasGrounded = IsGrounded;
             GroundCheck();
+
+            if (IsGrounded)
+                m_LastGroundedForCoyoteFixedTime = Time.fixedTime;
 
             if (IsGrounded && !wasGrounded)
             {
@@ -254,6 +341,43 @@ namespace Unity.FPS.Gameplay
                 if (Vector3.Dot(hit.normal, transform.up) > 0f && IsNormalUnderSlopeLimit(m_GroundNormal))
                     IsGrounded = true;
             }
+            else if (Physics.Raycast(bottom + Vector3.up * 0.06f, Vector3.down, out hit,
+                         chosenGroundCheckDistance + radius + 0.08f, GroundCheckLayers, QueryTriggerInteraction.Ignore))
+            {
+                m_GroundNormal = hit.normal;
+                if (Vector3.Dot(hit.normal, transform.up) > 0f && IsNormalUnderSlopeLimit(m_GroundNormal))
+                    IsGrounded = true;
+            }
+        }
+
+        bool TryApplyJump()
+        {
+            bool jumpQueued = Time.time < m_JumpQueuedTime + k_JumpBufferWindow;
+            if (!jumpQueued)
+                return false;
+
+            if (m_LastTimeJumped >= 0f && Time.time < m_LastTimeJumped + k_MinTimeBetweenJumps)
+                return false;
+
+            bool coyote = !IsGrounded &&
+                          Time.fixedTime - m_LastGroundedForCoyoteFixedTime <= k_CoyoteJumpTime;
+            if (!IsGrounded && !coyote)
+                return false;
+
+            SetCrouchingState(false, true);
+
+            Vector3 v = CharacterVelocity;
+            Vector3 horiz = Vector3.ProjectOnPlane(v, Vector3.up);
+            CharacterVelocity = new Vector3(horiz.x, JumpForce, horiz.z);
+
+            m_JumpQueuedTime = -1f;
+            m_LastTimeJumped = Time.time;
+            m_LastGroundedForCoyoteFixedTime = -1000f;
+            HasJumpedThisFrame = true;
+            IsGrounded = false;
+            m_GroundNormal = Vector3.up;
+            AudioSource.PlayOneShot(JumpSfx);
+            return true;
         }
 
         void HandleCharacterMovement()
@@ -265,10 +389,14 @@ namespace Unity.FPS.Gameplay
             float speedModifier = isSprinting ? SprintSpeedModifier : 1f;
             Vector3 worldspaceMoveInput = transform.TransformVector(m_MoveInput);
 
+            bool jumped = TryApplyJump();
+
             Vector3 velocity = CharacterVelocity;
             Vector3 horizontalVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
 
-            if (IsGrounded)
+            bool groundedLocomotion = IsGrounded && !jumped;
+
+            if (groundedLocomotion)
             {
                 Vector3 targetVelocity = worldspaceMoveInput * MaxSpeedOnGround * speedModifier;
                 if (IsCrouching)
@@ -280,18 +408,7 @@ namespace Unity.FPS.Gameplay
                 Vector3 newHorizontal = Vector3.Lerp(horizontalVelocity, targetVelocity,
                     MovementSharpnessOnGround * Time.fixedDeltaTime);
 
-                float yVel = velocity.y;
-                bool jumpQueued = Time.time < m_JumpQueuedTime + k_JumpBufferWindow;
-                if (jumpQueued && SetCrouchingState(false, false))
-                {
-                    m_JumpQueuedTime = -1f;
-                    yVel = JumpForce;
-                    AudioSource.PlayOneShot(JumpSfx);
-                    m_LastTimeJumped = Time.time;
-                    HasJumpedThisFrame = true;
-                    IsGrounded = false;
-                    m_GroundNormal = Vector3.up;
-                }
+                float yVel = k_GroundStickVelocity;
 
                 CharacterVelocity = new Vector3(newHorizontal.x, yVel, newHorizontal.z);
 
@@ -312,7 +429,6 @@ namespace Unity.FPS.Gameplay
 
                 float yVel = velocity.y - GravityDownForce * Time.fixedDeltaTime;
                 CharacterVelocity = new Vector3(horizontalVelocity.x, yVel, horizontalVelocity.z);
-
             }
 
             m_LatestImpactSpeed = CharacterVelocity;
@@ -326,8 +442,19 @@ namespace Unity.FPS.Gameplay
 
         public Vector3 GetDirectionReorientedOnSlope(Vector3 direction, Vector3 slopeNormal)
         {
-            Vector3 directionRight = Vector3.Cross(direction, transform.up);
-            return Vector3.Cross(slopeNormal, directionRight).normalized;
+            if (direction.sqrMagnitude < 1e-8f)
+                return Vector3.zero;
+
+            Vector3 dirN = direction.normalized;
+            Vector3 directionRight = Vector3.Cross(dirN, transform.up);
+            Vector3 slopeDir = directionRight.sqrMagnitude >= 1e-10f
+                ? Vector3.Cross(slopeNormal, directionRight)
+                : Vector3.ProjectOnPlane(dirN, slopeNormal);
+
+            if (slopeDir.sqrMagnitude < 1e-8f)
+                slopeDir = Vector3.ProjectOnPlane(dirN, slopeNormal);
+
+            return slopeDir.sqrMagnitude > 1e-8f ? slopeDir.normalized : dirN;
         }
 
         void UpdateCharacterHeight(bool force)

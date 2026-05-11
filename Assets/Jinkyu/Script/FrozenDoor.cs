@@ -1,7 +1,7 @@
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
-public class FrozenDoor : ObjectScript
+public class FrozenDoor : ObjectBase
 {
     [SerializeField]
     private bool isFrozen = true;
