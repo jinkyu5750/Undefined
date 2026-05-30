@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace NavKeypad { 
 public class KeypadInteractionFPV : MonoBehaviour
@@ -9,9 +10,9 @@ public class KeypadInteractionFPV : MonoBehaviour
     private void Awake() => cam = Camera.main;
     private void Update()
     {
-        var ray = cam.ScreenPointToRay(Input.mousePosition);
+        var ray = cam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
 
-        if (Input.GetMouseButtonDown(0))
+            if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (Physics.Raycast(ray, out var hit))
             {

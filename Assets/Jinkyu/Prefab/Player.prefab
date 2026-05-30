@@ -384,9 +384,10 @@ GameObject:
   - component: {fileID: 9000000000000000102}
   - component: {fileID: 6145509692674227223}
   - component: {fileID: 814417836257332542}
+  - component: {fileID: 3602433329927879103}
+  - component: {fileID: 2975465751533643}
   - component: {fileID: 1272397862697293493}
   - component: {fileID: 1661717823}
-  - component: {fileID: 3602433329927879103}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -421,7 +422,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7253983127304857660}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -506,6 +507,8 @@ MonoBehaviour:
   AccelerationSpeedInAir: 10
   SprintSpeedModifier: 1.5
   KillHeight: -50
+  ApplyLowFrictionToCapsule: 1
+  CapsuleFrictionOverride: {fileID: 0}
   RotationSpeed: 200
   AimingRotationMultiplier: 0.4
   JumpForce: 7
@@ -524,6 +527,45 @@ MonoBehaviour:
   MaxSpeedForFallDamage: 40
   FallDamageAtMinSpeed: 10
   FallDamageAtMaxSpeed: 30
+--- !u!114 &3602433329927879103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7253983127304857660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baf841445936a3b49a2b5f2e1e7b8e83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSystem
+  elasticityUpImpulse: 1
+  properties:
+    staticProperty: 0
+    dynamicProperty: 0
+    isInjected_Static: 0
+    isInjected_Dynamic: 0
+  detectDistance: 1.5
+  lookingObject: {fileID: 0}
+  liftedObject: {fileID: 0}
+  throwPower: 5
+  throwTime: 2
+  holdTime: 2
+  holdTimer: 0
+  isLeftClick: 0
+  isActionDone: 0
+--- !u!114 &2975465751533643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7253983127304857660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2974149c6fb01b409a280581634da96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NavKeypad.KeypadInteractionFPV
 --- !u!82 &1272397862697293493
 AudioSource:
   m_ObjectHideFlags: 0
@@ -720,31 +762,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &3602433329927879103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7253983127304857660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: baf841445936a3b49a2b5f2e1e7b8e83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSystem
-  elasticityUpImpulse: 1
-  properties:
-    staticProperty: 0
-    dynamicProperty: 0
-    isInjected_Static: 0
-    isInjected_Dynamic: 0
-  detectDistance: 1.5
-  throwPower: 5
-  throwTime: 2
-  holdTime: 2
-  holdTimer: 0
-  isLeftClick: 0
-  isActionDone: 0
 --- !u!1 &7383874627095517793
 GameObject:
   m_ObjectHideFlags: 0

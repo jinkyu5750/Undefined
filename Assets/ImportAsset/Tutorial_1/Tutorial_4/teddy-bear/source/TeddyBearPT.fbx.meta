@@ -3,7 +3,12 @@ guid: 27066038ac3e41a479540cdef2e81ab1
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Teddy_Inst
+    second: {fileID: 2100000, guid: 888080fd01116d841be9fb57ad89be04, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
