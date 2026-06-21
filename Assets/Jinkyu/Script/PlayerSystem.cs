@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using Unity.Cinemachine;
 using Unity.FPS.Gameplay;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,27 +7,26 @@ using UnityEngine.InputSystem.Controls;
 public class PlayerSystem : MonoBehaviour
 {
 
+    public CinemachineCamera cam { get; private set; }
+
     [Header("튕김(Elasticity)")]
     [SerializeField] private float elasticityUpImpulse = 15f;
 
     private Rigidbody rig;
     private PlayerCharacterController fpsSampleController;
-    private CharacterScript.FPSController simpleFpsController;
 
-    // CharacterController는 OnCollisionEnter가 없어서 "Enter 순간"을 프레임 스탬프로 판별
-    private readonly Dictionary<int, int> _elasticLastHitFrameByColliderId = new();
 
     [Header("현재 보유중인 성질")]
-    [SerializeField] private ObjectProperties properties;//���� - ������ ������ ���� �ش� ������ ������ �ʴ´�. �������ϴ°���
+    [SerializeField] private ObjectProperties properties;
 
     [Header("오브젝트 감지 거리")]
     [SerializeField] private float detectDistance;
 
     public bool isLookObject { get; private set; }
     RaycastHit hit;
-    [SerializeField]private ObjectBase lookingObject;
+    [SerializeField] private ObjectBase lookingObject;
     private ObjectData data;
-   [SerializeField] private ObjectBase liftedObject;
+    [SerializeField] private ObjectBase liftedObject;
 
     [Header("던지기 관련")]
     [SerializeField] float throwPower;
@@ -44,9 +43,10 @@ public class PlayerSystem : MonoBehaviour
 
     private void Start()
     {
+        cam = GetComponentInChildren<CinemachineCamera>();
         rig = GetComponent<Rigidbody>();
         fpsSampleController = GetComponent<PlayerCharacterController>();
-        simpleFpsController = GetComponent<CharacterScript.FPSController>();
+
     }
     private void Update()
     {
@@ -74,7 +74,6 @@ public class PlayerSystem : MonoBehaviour
                 }
                 isLookObject = true;
 
-                //������ ��ũ���� �г�
                 UIManager.instance.OnOffDiscription(true);
                 UIManager.instance.SetObjectDiscription(
                     data.name,
@@ -187,8 +186,6 @@ public class PlayerSystem : MonoBehaviour
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-
-
 
             if (isLookObject && liftedObject == null && hit.collider != null)
             {

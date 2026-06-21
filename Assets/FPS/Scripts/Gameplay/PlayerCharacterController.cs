@@ -10,8 +10,8 @@ namespace Unity.FPS.Gameplay
     {
         [Header("References")]
         [Tooltip("Reference to the main camera used for the player")]
-        public Camera PlayerCamera;
-
+        public Transform PlayerCamera;
+            
         [Tooltip("Audio source for footsteps, jump, etc...")]
         public AudioSource AudioSource;
 
@@ -127,7 +127,6 @@ namespace Unity.FPS.Gameplay
 
         Health m_Health;
         PlayerInputHandler m_InputHandler;
-        PlayerWeaponsManager m_WeaponsManager;
         Actor m_Actor;
         Rigidbody m_Rigidbody;
         CapsuleCollider m_Capsule;
@@ -151,6 +150,7 @@ namespace Unity.FPS.Gameplay
 
         float m_LastGroundedForCoyoteFixedTime = -1000f;
 
+        public bool canMove = true;
         bool CollisionSourceSuppressesGroundStick(Collision collision)
         {
             foreach (MonoBehaviour mb in collision.collider.GetComponentsInParent<MonoBehaviour>(true))
@@ -382,6 +382,8 @@ namespace Unity.FPS.Gameplay
 
         void HandleCharacterMovement()
         {
+            if (!canMove) return;
+
             bool isSprinting = m_SprintHeld;
             if (isSprinting)
                 isSprinting = SetCrouchingState(false, false);
@@ -463,14 +465,14 @@ namespace Unity.FPS.Gameplay
             {
                 m_Capsule.height = m_TargetCapsuleHeight;
                 m_Capsule.center = Vector3.up * m_Capsule.height * 0.5f;
-                PlayerCamera.transform.localPosition = Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio;
+             //   PlayerCamera.transform.localPosition = Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio;
             }
             else if (!Mathf.Approximately(m_Capsule.height, m_TargetCapsuleHeight))
             {
                 m_Capsule.height = Mathf.Lerp(m_Capsule.height, m_TargetCapsuleHeight, CrouchingSharpness * Time.deltaTime);
                 m_Capsule.center = Vector3.up * m_Capsule.height * 0.5f;
-                PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
-                    Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
+            //    PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
+           //         Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
             }
         }
 

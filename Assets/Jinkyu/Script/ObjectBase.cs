@@ -1,8 +1,8 @@
 using System.Collections;
-using Unity.FPS.Game;
+using Unity.Cinemachine;
 using UnityEngine;
 
-public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
+public class ObjectBase : MonoBehaviour, IPropertyReactor
 {
 
 
@@ -18,11 +18,11 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
     float curInjectTimer_Dynamic;
 
 
-   [SerializeField] private StaticPropertyType storedStaticProperty;
+    [SerializeField] private StaticPropertyType storedStaticProperty;
     private DynamicPropertyType storedDynamicProperty;
 
     private Transform player;
-
+    [SerializeField] private CinemachineCamera cam;
     public bool isLifted { get; private set; }
     private bool readyToLift = false;
 
@@ -37,7 +37,7 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
 
     public virtual void OnPropertyInjected_Static(StaticPropertyType property)
     {
-        switch(property)
+        switch (property)
         {
             case StaticPropertyType.Heavy:
                 rig.mass = 100f;
@@ -47,7 +47,7 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
                 break;
             case StaticPropertyType.Transparent:
                 rend.material.SetColor("_BaseColor", new Color(1f, 1f, 1f, 1f));
-                    StartCoroutine(SetAlpha(1f));
+                StartCoroutine(SetAlpha(1f));
                 break;
 
         }
@@ -59,14 +59,15 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
             case DynamicPropertyType.Elasticity:
                 //탄성높이기
                 break;
-           
+
         }
     }
 
 
-    private void Start()
+    public virtual void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
+        cam = player.GetComponent<PlayerSystem>().cam;
         rig = GetComponent<Rigidbody>();
         rend = GetComponent<Renderer>();
         targetPos = transform.position + new Vector3(0, 0.5f, 0);
@@ -149,7 +150,7 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
 
         runningTime += Time.deltaTime * speed;
         float yPos = (Mathf.Sin(runningTime)) * length;
-        targetPos = player.position + (Camera.main.transform.forward) * offset.magnitude;
+        targetPos = player.position + (cam.transform.forward) * offset.magnitude;
         targetPos.y = targetPos.y + yPos + 1.5f;
 
         if (readyToLift)
@@ -164,7 +165,7 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
 
         transform.position = targetPos;
     }
-    public void SetIsLifted(bool on)
+    public virtual void SetIsLifted(bool on)
     {
         isLifted = on;
         rig.useGravity = !on;
@@ -202,7 +203,7 @@ public abstract class ObjectBase : MonoBehaviour, IPropertyReactor
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.collider.CompareTag("Player") && data.properties.dynamicProperty == DynamicPropertyType.Elasticity)
+        if (collision.collider.CompareTag("Player") && data.properties.dynamicProperty == DynamicPropertyType.Elasticity)
         {
             collision.gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 5f, ForceMode.Impulse);
         }
