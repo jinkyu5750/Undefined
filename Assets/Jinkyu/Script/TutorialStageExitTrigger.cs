@@ -4,9 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class TutorialStageExitTrigger : MonoBehaviour
 {
-    [Header("Door")]
-    [SerializeField] private Door door;
-    [SerializeField] private bool requireDoorOpen = true;
+
 
     [Header("Trigger")]
     [SerializeField] private string playerTag = "Player";
@@ -33,18 +31,15 @@ public class TutorialStageExitTrigger : MonoBehaviour
     private void Reset()
     {
         Collider col = GetComponent<Collider>();
-        col.isTrigger = true;
     }
 
-    private void OnTriggerEnter(Collider other)
+
+    private void OnCollisionEnter(Collision other)
     {
         if (hasTriggered)
             return;
 
-        if (!other.CompareTag(playerTag))
-            return;
-
-        if (requireDoorOpen && door != null && !door.open)
+        if (!other.gameObject.CompareTag(playerTag))
             return;
 
         if (TutorialStageManager.instance == null)

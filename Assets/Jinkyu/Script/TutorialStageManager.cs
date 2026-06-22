@@ -12,9 +12,9 @@ public class TutorialStageManager : MonoBehaviour
     [Serializable]
     public class StageSetup
     {
-        [Tooltip("이 스테이지의 퍼즐/오브젝트를 묶은 부모 오브젝트")]
+        [Tooltip("스테이지의 오브젝트들을 묶은 부모 오브젝트")]
         [FormerlySerializedAs("objects")]
-        public GameObject stageRoot;
+        public GameObject stageObjects;
     }
 
     [Header("Stages")]
@@ -118,9 +118,9 @@ public class TutorialStageManager : MonoBehaviour
     {
         if (stageIndex < 0 || stageIndex >= stages.Length)
             return;
-
-        if (stages[stageIndex]?.stageRoot != null)
-            stages[stageIndex].stageRoot.SetActive(active);
+            
+    //    if (stages[stageIndex]?.stageObjects != null)
+            stages[stageIndex].stageObjects.SetActive(active);
     }
 
     private void TeleportPlayerToSpawn()
@@ -136,6 +136,7 @@ public class TutorialStageManager : MonoBehaviour
         }
 
         player.SetPositionAndRotation(playerSpawnPoint.position, playerSpawnPoint.rotation);
+        
     }
 
     private IEnumerator Fade(float from, float to, float duration)
