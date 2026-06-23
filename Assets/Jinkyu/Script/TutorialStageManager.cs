@@ -38,7 +38,7 @@ public class TutorialStageManager : MonoBehaviour
 
     private PlayerCharacterController playerController;
     private PlayerSystem playerSystem;
-
+    Rigidbody rb;
     public int CurrentStageNumber => currentStageIndex + 1;
     public int TotalStages => stages != null ? stages.Length : 0;
     public bool IsTransitioning => isTransitioning;
@@ -54,6 +54,7 @@ public class TutorialStageManager : MonoBehaviour
         {
             playerController = player.GetComponent<PlayerCharacterController>();
             playerSystem = player.GetComponent<PlayerSystem>();
+            rb = player.GetComponent<Rigidbody>();
         }
 
         if (fadeCanvas != null)
@@ -86,11 +87,14 @@ public class TutorialStageManager : MonoBehaviour
     private IEnumerator TransitionToNextStage()
     {
         isTransitioning = true;
+
+        yield return new WaitForSeconds(0.25f);
         SetPlayerControl(false);
-
+        RemovePlayerVelocity();
+      
         yield return Fade(0f, 1f, fadeToBlackDuration);
-
         TeleportPlayerToSpawn();
+
         ApplyStage(currentStageIndex + 1);
 
         yield return Fade(1f, 0f, fadeFromBlackDuration);
@@ -123,18 +127,19 @@ public class TutorialStageManager : MonoBehaviour
             stages[stageIndex].stageObjects.SetActive(active);
     }
 
-    private void TeleportPlayerToSpawn()
+    private void RemovePlayerVelocity()
     {
-        if (player == null || playerSpawnPoint == null)
-            return;
-
-        Rigidbody rb = player.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
-
+    }
+    private void TeleportPlayerToSpawn()
+    {
+        if (player == null || playerSpawnPoint == null)
+            return;
+      
         player.SetPositionAndRotation(playerSpawnPoint.position, playerSpawnPoint.rotation);
         
     }
@@ -143,6 +148,8 @@ public class TutorialStageManager : MonoBehaviour
     {
         if (fadeCanvas == null)
             yield break;
+
+        yield return new WaitForSeconds(0.5f);
 
         fadeCanvas.blocksRaycasts = to > from;
 
