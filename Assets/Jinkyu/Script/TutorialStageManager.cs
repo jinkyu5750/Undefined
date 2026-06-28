@@ -93,9 +93,9 @@ public class TutorialStageManager : MonoBehaviour
         RemovePlayerVelocity();
       
         yield return Fade(0f, 1f, fadeToBlackDuration);
-        TeleportPlayerToSpawn();
 
         ApplyStage(currentStageIndex + 1);
+        TeleportPlayerToSpawn();
 
         yield return Fade(1f, 0f, fadeFromBlackDuration);
 
@@ -139,9 +139,8 @@ public class TutorialStageManager : MonoBehaviour
     {
         if (player == null || playerSpawnPoint == null)
             return;
-      
-        player.SetPositionAndRotation(playerSpawnPoint.position, playerSpawnPoint.rotation);
-        
+
+        player.transform.position = playerSpawnPoint.position;
     }
 
     private IEnumerator Fade(float from, float to, float duration)
