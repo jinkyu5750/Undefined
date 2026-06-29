@@ -91,11 +91,10 @@ public class TutorialStageManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         SetPlayerControl(false);
         RemovePlayerVelocity();
-      
+
         yield return Fade(0f, 1f, fadeToBlackDuration);
 
         ApplyStage(currentStageIndex + 1);
-        yield return new WaitForFixedUpdate();
         TeleportPlayerToSpawn();
 
         yield return Fade(1f, 0f, fadeFromBlackDuration);
@@ -141,8 +140,11 @@ public class TutorialStageManager : MonoBehaviour
         if (player == null || playerSpawnPoint == null)
             return;
 
-        // player.transform.position = playerSpawnPoint.position;
-        rb.position = playerSpawnPoint.position;
+        if (rb != null)
+        {
+            rb.position = playerSpawnPoint.position; // 텔레포트는 리지드바디로.. 트랜스폼으로 텔레포트 시킨들 중력등으로 남아있는 속력으로 동기화가 되어버림
+        //    RemovePlayerVelocity();
+        }
     }
 
     private IEnumerator Fade(float from, float to, float duration)
