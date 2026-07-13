@@ -33,6 +33,9 @@ public class TutorialStageManager : MonoBehaviour
     [SerializeField] private UnityEvent<int> onStageStarted;
     [SerializeField] private UnityEvent onAllStagesCompleted;
 
+    [Header("마지막 스테이지 이동해야 하는 벽")]
+    [SerializeField] private GameObject cube;
+
     [SerializeField] private int currentStageIndex;
     private bool isTransitioning;
 
@@ -125,6 +128,12 @@ public class TutorialStageManager : MonoBehaviour
             
     //    if (stages[stageIndex]?.stageObjects != null)
             stages[stageIndex].stageObjects.SetActive(active);
+        if(stageIndex == 3)
+        {
+            Vector3 pos = cube.transform.position;
+            cube.transform.position = new Vector3(pos.x, -0.45f, pos.y);
+        }
+
     }
 
     private void RemovePlayerVelocity()

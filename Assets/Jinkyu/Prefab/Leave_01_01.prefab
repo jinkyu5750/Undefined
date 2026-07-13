@@ -171,7 +171,7 @@ MonoBehaviour:
     canHold: 1
     properties:
       staticProperty: 0
-      dynamicProperty: 0
+      dynamicProperty: 7
       isInjected_Static: 0
       isInjected_Dynamic: 0
   injectTimer_Static: 5
