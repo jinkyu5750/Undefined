@@ -1,5 +1,4 @@
 using Unity.Cinemachine;
-using Unity.FPS.Gameplay;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -12,8 +11,6 @@ public class PlayerSystem : MonoBehaviour
     [Header("튕김(Elasticity)")]
     [SerializeField] private float elasticityUpImpulse = 15f;
 
-    private Rigidbody rig;
-    private PlayerCharacterController fpsSampleController;
 
 
     [Header("현재 보유중인 성질")]
@@ -41,12 +38,17 @@ public class PlayerSystem : MonoBehaviour
     [SerializeField] private bool isLeftClick;
     [SerializeField] private bool isActionDone;
 
+    // 나무오르기
+    public bool canClimbTree { get; private set; }
+    public bool isClimbing;
+
+    public Tree_Growth detectedTree { get; private set; }
+    private PlayerTreeClimb treeClimb;
     private void Start()
     {
         cam = GetComponentInChildren<CinemachineCamera>();
-        rig = GetComponent<Rigidbody>();
-        fpsSampleController = GetComponent<PlayerCharacterController>();
 
+        treeClimb = GetComponent<PlayerTreeClimb>();
     }
     private void Update()
     {
@@ -54,6 +56,7 @@ public class PlayerSystem : MonoBehaviour
         Lifting();
         Throw();
         Extraction_Injection();
+        treeClimb?.TickUpdate();
     }
     public void DetectObject()
     {
@@ -61,11 +64,29 @@ public class PlayerSystem : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, detectDistance))
         {
+            Door_Tutorial_04 door = hit.transform.GetComponent<Door_Tutorial_04>();
+
+            if (door != null && Keyboard.current.eKey.wasPressedThisFrame)
+                door.TryOpenDoor();
+
             lookingObject = hit.transform.GetComponent<ObjectBase>();
             if (lookingObject != null)
             {
                 if (lookingObject == liftedObject) return; // 들고있는건 패스
 
+                Tree_Growth tree = hit.transform.GetComponentInParent<Tree_Growth>();
+                if (tree != null && tree.IsGrown)
+                {
+                    canClimbTree = true;
+                    detectedTree = tree;
+                }
+                else
+                {
+                    canClimbTree = false;
+                    detectedTree = null;
+                }
+
+                
                 data = lookingObject.GetData();
                 if (data == null)
                 {

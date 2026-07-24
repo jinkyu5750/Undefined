@@ -11,7 +11,7 @@ namespace Unity.FPS.Gameplay
         [Header("References")]
         [Tooltip("Reference to the main camera used for the player")]
         public Transform PlayerCamera;
-            
+
         [Tooltip("Audio source for footsteps, jump, etc...")]
         public AudioSource AudioSource;
 
@@ -123,6 +123,9 @@ namespace Unity.FPS.Gameplay
         public bool IsDead { get; private set; }
         public bool IsCrouching { get; private set; }
 
+        public bool IsClimbing { get; private set; }
+
+        public bool SetIsClimbing(bool isClimbing) => IsClimbing = isClimbing;
         public float RotationMultiplier => 1f;
 
         Health m_Health;
@@ -149,8 +152,11 @@ namespace Unity.FPS.Gameplay
         const float k_MinTimeBetweenJumps = 0.08f;
 
         float m_LastGroundedForCoyoteFixedTime = -1000f;
-
+        private float m_YawInput; // 클래스 멤버에 추가
         public bool canMove = true;
+
+        public Vector3 GetCachedMoveInput() => m_MoveInput;
+        public void UseGravity(bool use) => m_Rigidbody.useGravity = use;
         bool CollisionSourceSuppressesGroundStick(Collision collision)
         {
             foreach (MonoBehaviour mb in collision.collider.GetComponentsInParent<MonoBehaviour>(true))
@@ -214,17 +220,17 @@ namespace Unity.FPS.Gameplay
             m_InputHandler = GetComponent<PlayerInputHandler>();
             DebugUtility.HandleErrorIfNullGetComponent<PlayerInputHandler, PlayerCharacterController>(m_InputHandler,
                 this, gameObject);
-/*
-            m_WeaponsManager = GetComponent<PlayerWeaponsManager>();
-            DebugUtility.HandleErrorIfNullGetComponent<PlayerWeaponsManager, PlayerCharacterController>(
-                m_WeaponsManager, this, gameObject);
+            /*
+                        m_WeaponsManager = GetComponent<PlayerWeaponsManager>();
+                        DebugUtility.HandleErrorIfNullGetComponent<PlayerWeaponsManager, PlayerCharacterController>(
+                            m_WeaponsManager, this, gameObject);
 
-            m_Health = GetComponent<Health>();
-            DebugUtility.HandleErrorIfNullGetComponent<Health, PlayerCharacterController>(m_Health, this, gameObject);
+                        m_Health = GetComponent<Health>();
+                        DebugUtility.HandleErrorIfNullGetComponent<Health, PlayerCharacterController>(m_Health, this, gameObject);
 
-            m_Actor = GetComponent<Actor>();
-            DebugUtility.HandleErrorIfNullGetComponent<Actor, PlayerCharacterController>(m_Actor, this, gameObject);
-*/
+                        m_Actor = GetComponent<Actor>();
+                        DebugUtility.HandleErrorIfNullGetComponent<Actor, PlayerCharacterController>(m_Actor, this, gameObject);
+            */
             m_Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             m_Rigidbody.useGravity = false;
@@ -268,30 +274,30 @@ namespace Unity.FPS.Gameplay
 
             HasJumpedThisFrame = false;
 
-            // look rotation (non-physics)
-            transform.Rotate(
-                new Vector3(0f, m_InputHandler.GetLookInputsHorizontal() * RotationSpeed * RotationMultiplier, 0f),
-                Space.Self);
+            // 좌우 회전 입력은 캐싱만 하고, 실제 적용은 FixedUpdate에서
+            m_YawInput = m_InputHandler.GetLookInputsHorizontal() * RotationSpeed * RotationMultiplier;
 
+            // 카메라 상하는 물리랑 무관하니 그대로 Update에서 처리해도 OK
             m_CameraVerticalAngle += m_InputHandler.GetLookInputsVertical() * RotationSpeed * RotationMultiplier;
             m_CameraVerticalAngle = Mathf.Clamp(m_CameraVerticalAngle, -89f, 89f);
             PlayerCamera.transform.localEulerAngles = new Vector3(m_CameraVerticalAngle, 0, 0);
 
-            // crouch toggle
             if (m_InputHandler.GetCrouchInputDown())
                 SetCrouchingState(!IsCrouching, false);
-
             UpdateCharacterHeight(false);
 
-            // cache input for FixedUpdate
             m_MoveInput = m_InputHandler.GetMoveInput();
             m_SprintHeld = m_InputHandler.GetSprintInputHeld();
+
             if (m_InputHandler.GetJumpInputDown())
                 m_JumpQueuedTime = Time.time;
         }
-
         void FixedUpdate()
         {
+
+            Quaternion deltaRot = Quaternion.Euler(0f, m_YawInput, 0f);
+            m_Rigidbody.MoveRotation(m_Rigidbody.rotation * deltaRot);
+
             bool wasGrounded = IsGrounded;
             GroundCheck();
 
@@ -316,7 +322,7 @@ namespace Unity.FPS.Gameplay
             }
 
             HandleCharacterMovement();
-         
+
         }
 
         void GroundCheck()
@@ -350,7 +356,7 @@ namespace Unity.FPS.Gameplay
             }
         }
 
-        bool TryApplyJump()
+       public  bool TryApplyJump(Vector3 customJumpDir = default)
         {
             bool jumpQueued = Time.time < m_JumpQueuedTime + k_JumpBufferWindow;
             if (!jumpQueued)
@@ -361,13 +367,21 @@ namespace Unity.FPS.Gameplay
 
             bool coyote = !IsGrounded &&
                           Time.fixedTime - m_LastGroundedForCoyoteFixedTime <= k_CoyoteJumpTime;
-            if (!IsGrounded && !coyote)
+            if (!IsGrounded && !coyote && !IsClimbing)
                 return false;
 
             SetCrouchingState(false, true);
 
             Vector3 v = CharacterVelocity;
             Vector3 horiz = Vector3.ProjectOnPlane(v, Vector3.up);
+            float jumpForce = JumpForce;
+            if (IsClimbing)
+            {
+                // 커스텀 방향이 주어지면 그쪽으로, 없으면 기존처럼 표면 바깥쪽으로
+                Vector3 dir = customJumpDir.sqrMagnitude > 0.01f ? customJumpDir.normalized : -transform.forward;
+                horiz = dir * 5; // 기존 climbRadius 기반 속도 말고 별도 튜닝값 추천
+                jumpForce *= 5;
+            }
             CharacterVelocity = new Vector3(horiz.x, JumpForce, horiz.z);
 
             m_JumpQueuedTime = -1f;
@@ -379,10 +393,31 @@ namespace Unity.FPS.Gameplay
             AudioSource.PlayOneShot(JumpSfx);
             return true;
         }
+        public bool TryApplyJumpWhileClimbing()
+        {
+            bool jumpQueued = Time.time < m_JumpQueuedTime + k_JumpBufferWindow;
+            if (!jumpQueued)
+                return false;
 
+            if (m_LastTimeJumped >= 0f && Time.time < m_LastTimeJumped + k_MinTimeBetweenJumps)
+                return false;
+
+            SetCrouchingState(false, true);
+
+            Vector3 v = CharacterVelocity;
+            Vector3 horiz = Vector3.ProjectOnPlane(v, Vector3.up);
+            CharacterVelocity = new Vector3(horiz.x, JumpForce, horiz.z);
+
+            m_JumpQueuedTime = -1f;
+            m_LastTimeJumped = Time.time;
+            HasJumpedThisFrame = true;
+            IsGrounded = false;
+            AudioSource.PlayOneShot(JumpSfx);
+            return true;
+        }
         void HandleCharacterMovement()
         {
-            if (!canMove) return;
+            if (!canMove || IsClimbing) return;
 
             bool isSprinting = m_SprintHeld;
             if (isSprinting)
@@ -395,7 +430,7 @@ namespace Unity.FPS.Gameplay
 
             Vector3 velocity = CharacterVelocity;
             Vector3 horizontalVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
-
+                
             bool groundedLocomotion = IsGrounded && !jumped;
 
             if (groundedLocomotion)
@@ -465,14 +500,14 @@ namespace Unity.FPS.Gameplay
             {
                 m_Capsule.height = m_TargetCapsuleHeight;
                 m_Capsule.center = Vector3.up * m_Capsule.height * 0.5f;
-             //   PlayerCamera.transform.localPosition = Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio;
+                //   PlayerCamera.transform.localPosition = Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio;
             }
             else if (!Mathf.Approximately(m_Capsule.height, m_TargetCapsuleHeight))
             {
                 m_Capsule.height = Mathf.Lerp(m_Capsule.height, m_TargetCapsuleHeight, CrouchingSharpness * Time.deltaTime);
                 m_Capsule.center = Vector3.up * m_Capsule.height * 0.5f;
-            //    PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
-           //         Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
+                //    PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
+                //         Vector3.up * m_TargetCapsuleHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
             }
         }
 

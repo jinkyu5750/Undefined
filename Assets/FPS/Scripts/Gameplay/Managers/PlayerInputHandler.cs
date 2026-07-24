@@ -21,7 +21,7 @@ namespace Unity.FPS.Gameplay
         [Tooltip("Used to flip the horizontal input axis")]
         public bool InvertXAxis = false;
 
-      //  GameFlowManager m_GameFlowManager;
+        //  GameFlowManager m_GameFlowManager;
         PlayerCharacterController m_PlayerCharacterController;
         bool m_FireInputWasHeld;
 
@@ -29,7 +29,7 @@ namespace Unity.FPS.Gameplay
         private InputAction m_LookAction;
         private InputAction m_JumpAction;
         private InputAction m_FireAction;
-   //     private InputAction m_AimAction;
+        //     private InputAction m_AimAction;
         private InputAction m_SprintAction;
         private InputAction m_CrouchAction;
         private InputAction m_ReloadAction;
@@ -40,8 +40,8 @@ namespace Unity.FPS.Gameplay
             m_PlayerCharacterController = GetComponent<PlayerCharacterController>();
             DebugUtility.HandleErrorIfNullGetComponent<PlayerCharacterController, PlayerInputHandler>(
                 m_PlayerCharacterController, this, gameObject);
-          //  m_GameFlowManager = FindFirstObjectByType<GameFlowManager>();
-         //   DebugUtility.HandleErrorIfNullFindObject<GameFlowManager, PlayerInputHandler>(m_GameFlowManager, this);
+            //  m_GameFlowManager = FindFirstObjectByType<GameFlowManager>();
+            //   DebugUtility.HandleErrorIfNullFindObject<GameFlowManager, PlayerInputHandler>(m_GameFlowManager, this);
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -49,28 +49,28 @@ namespace Unity.FPS.Gameplay
             m_MoveAction = InputSystem.actions.FindAction("Player/Move");
             m_LookAction = InputSystem.actions.FindAction("Player/Look");
             m_JumpAction = InputSystem.actions.FindAction("Player/Jump");
-         /*   m_FireAction = InputSystem.actions.FindAction("Player/Fire");
-            m_AimAction = InputSystem.actions.FindAction("Player/Aim");*/
+            /*   m_FireAction = InputSystem.actions.FindAction("Player/Fire");
+               m_AimAction = InputSystem.actions.FindAction("Player/Aim");*/
             m_SprintAction = InputSystem.actions.FindAction("Player/Sprint");
             m_CrouchAction = InputSystem.actions.FindAction("Player/Crouch");
-       /*     m_ReloadAction = InputSystem.actions.FindAction("Player/Reload");
-            m_NextWeaponAction = InputSystem.actions.FindAction("Player/NextWeapon");*/
-            
-      //      m_MoveAction.Enable();
-     //       m_LookAction.Enable();
-     //       m_JumpAction.Enable();
-      
-         //   m_AimAction.Enable();
-     //       m_SprintAction.Enable();
-      //      m_CrouchAction.Enable();
-        //    m_ReloadAction.Enable();
-        //    m_NextWeaponAction.Enable();
+            /*     m_ReloadAction = InputSystem.actions.FindAction("Player/Reload");
+                 m_NextWeaponAction = InputSystem.actions.FindAction("Player/NextWeapon");*/
+
+            //      m_MoveAction.Enable();
+            //       m_LookAction.Enable();
+            //       m_JumpAction.Enable();
+
+            //   m_AimAction.Enable();
+            //       m_SprintAction.Enable();
+            //      m_CrouchAction.Enable();
+            //    m_ReloadAction.Enable();
+            //    m_NextWeaponAction.Enable();
         }
 
-   /*     void LateUpdate()
-        {
-            m_FireInputWasHeld = GetFireInputHeld();
-        }*/
+        /*     void LateUpdate()
+             {
+                 m_FireInputWasHeld = GetFireInputHeld();
+             }*/
 
         public bool CanProcessInput()
         {
@@ -82,7 +82,11 @@ namespace Unity.FPS.Gameplay
             if (CanProcessInput())
             {
                 var input = m_MoveAction.ReadValue<Vector2>();
-                Vector3 move = new Vector3(input.x, 0f, input.y);
+                Vector3 move;
+                if (m_PlayerCharacterController.IsClimbing)
+                    move = new Vector3(input.x, input.y, 0f);
+                else
+                    move = new Vector3(input.x, 0f, input.y);
 
                 // constrain move input to a maximum magnitude of 1, otherwise diagonal movement might exceed the max move speed defined
                 move = Vector3.ClampMagnitude(move, 1);
@@ -97,14 +101,14 @@ namespace Unity.FPS.Gameplay
         {
             if (!CanProcessInput())
                 return 0.0f;
-            
+
             float input = m_LookAction.ReadValue<Vector2>().x;
 
             if (InvertXAxis)
                 input *= -1;
 
             input *= LookSensitivity;
-            
+
 #if UNITY_WEBGL
             // Mouse tends to be even more sensitive in WebGL due to mouse acceleration, so reduce it even more
             input *= WebglLookSensitivityMultiplier;
@@ -117,14 +121,14 @@ namespace Unity.FPS.Gameplay
         {
             if (!CanProcessInput())
                 return 0.0f;
-            
+
             float input = m_LookAction.ReadValue<Vector2>().y;
 
             if (InvertYAxis)
                 input *= -1;
 
             input *= LookSensitivity;
-            
+
 #if UNITY_WEBGL
             // Mouse tends to be even more sensitive in WebGL due to mouse acceleration, so reduce it even more
             input *= WebglLookSensitivityMultiplier;
@@ -153,35 +157,35 @@ namespace Unity.FPS.Gameplay
             return false;
         }
 
-   /*     public bool GetFireInputDown()
-        {
-            return GetFireInputHeld() && !m_FireInputWasHeld;
-        }
+        /*     public bool GetFireInputDown()
+             {
+                 return GetFireInputHeld() && !m_FireInputWasHeld;
+             }
 
-        public bool GetFireInputReleased()
-        {
-            return !GetFireInputHeld() && m_FireInputWasHeld;
-        }
-*/
-     /*   public bool GetFireInputHeld()
-        {
-            if (CanProcessInput())
-            {
-                return m_FireAction.IsPressed();
-            }
+             public bool GetFireInputReleased()
+             {
+                 return !GetFireInputHeld() && m_FireInputWasHeld;
+             }
+     */
+        /*   public bool GetFireInputHeld()
+           {
+               if (CanProcessInput())
+               {
+                   return m_FireAction.IsPressed();
+               }
 
-            return false;
-        }*/
+               return false;
+           }*/
 
- /*       public bool GetAimInputHeld()
-        {
-            if (CanProcessInput())
-            {
-                return m_AimAction.IsPressed();
-            }
+        /*       public bool GetAimInputHeld()
+               {
+                   if (CanProcessInput())
+                   {
+                       return m_AimAction.IsPressed();
+                   }
 
-            return false;
-        }*/
+                   return false;
+               }*/
 
         public bool GetSprintInputHeld()
         {
@@ -223,21 +227,21 @@ namespace Unity.FPS.Gameplay
             return false;
         }
 
-      /*  public int GetSwitchWeaponInput()
-        {
-            if (CanProcessInput())
-            {
-                var input = m_NextWeaponAction.ReadValue<float>();
+        /*  public int GetSwitchWeaponInput()
+          {
+              if (CanProcessInput())
+              {
+                  var input = m_NextWeaponAction.ReadValue<float>();
 
-                if (input > 0f)
-                    return -1;
-                
-                if (input < 0f)
-                    return 1;
-            }
+                  if (input > 0f)
+                      return -1;
 
-            return 0;
-        }*/
+                  if (input < 0f)
+                      return 1;
+              }
+
+              return 0;
+          }*/
 
         public int GetSelectWeaponInput()
         {
