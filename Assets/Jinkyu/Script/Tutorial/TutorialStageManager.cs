@@ -125,13 +125,13 @@ public class TutorialStageManager : MonoBehaviour
     {
         if (stageIndex < 0 || stageIndex >= stages.Length)
             return;
-            
-    //    if (stages[stageIndex]?.stageObjects != null)
-            stages[stageIndex].stageObjects.SetActive(active);
-        if(stageIndex == 3)
+
+        //    if (stages[stageIndex]?.stageObjects != null)
+        stages[stageIndex].stageObjects.SetActive(active);
+        if (stageIndex == 3 && active)
         {
-            Vector3 pos = cube.transform.position;
-            cube.transform.position = new Vector3(pos.x, -0.45f, pos.y);
+            Vector3 pos = cube.transform.localPosition;
+            cube.transform.localPosition = new Vector3(pos.x, -0.45f, pos.z);
         }
 
     }
@@ -152,7 +152,7 @@ public class TutorialStageManager : MonoBehaviour
         if (rb != null)
         {
             rb.position = playerSpawnPoint.position; // 텔레포트는 리지드바디로.. 트랜스폼으로 텔레포트 시킨들 중력등으로 남아있는 속력으로 동기화가 되어버림
-        //    RemovePlayerVelocity();
+                                                     //    RemovePlayerVelocity();
         }
     }
 

@@ -281,6 +281,8 @@ namespace Unity.FPS.Gameplay
             m_CameraVerticalAngle += m_InputHandler.GetLookInputsVertical() * RotationSpeed * RotationMultiplier;
             m_CameraVerticalAngle = Mathf.Clamp(m_CameraVerticalAngle, -89f, 89f);
             PlayerCamera.transform.localEulerAngles = new Vector3(m_CameraVerticalAngle, 0, 0);
+            Quaternion deltaRot = Quaternion.Euler(0f, m_YawInput, 0f);
+            m_Rigidbody.MoveRotation(m_Rigidbody.rotation * deltaRot);
 
             if (m_InputHandler.GetCrouchInputDown())
                 SetCrouchingState(!IsCrouching, false);
@@ -295,9 +297,7 @@ namespace Unity.FPS.Gameplay
         void FixedUpdate()
         {
 
-            Quaternion deltaRot = Quaternion.Euler(0f, m_YawInput, 0f);
-            m_Rigidbody.MoveRotation(m_Rigidbody.rotation * deltaRot);
-
+ 
             bool wasGrounded = IsGrounded;
             GroundCheck();
 
